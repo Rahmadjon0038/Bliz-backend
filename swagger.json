@@ -1,0 +1,208 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Billz Backend API",
+    "version": "3.0.0",
+    "description": "Ombor, sotuv va hisobot modullari uchun ochiq API."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Ombor API",
+      "description": "Ombordagi mahsulotlarni boshqarish."
+    },
+    {
+      "name": "Sotuv API",
+      "description": "Sotuv yaratish, kunlik va sana oralig'i bo'yicha sotuv tarixini olish."
+    },
+    {
+      "name": "Hisobot API",
+      "description": "Kunlik savdoni yopish va yopilgan kunlar hisobotini ko'rish."
+    }
+  ],
+  "paths": {
+    "/api/products": {
+      "get": {
+        "tags": ["Ombor API"],
+        "summary": "Mahsulotlar ro'yxati",
+        "responses": {
+          "200": {
+            "description": "Mahsulotlar qaytariladi"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Ombor API"],
+        "summary": "Mahsulot qo'shish",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Kurtka" },
+                  "color": { "type": "string", "example": "black" },
+                  "quantity": { "type": "integer", "example": 20 },
+                  "price": { "type": "number", "example": 250000 }
+                },
+                "required": ["name", "color", "quantity", "price"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Maxsulot muvaffaqiyatli qo'shildi" },
+          "400": { "description": "Validatsiya xatosi" }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "put": {
+        "tags": ["Ombor API"],
+        "summary": "Mahsulotni yangilash",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "color": { "type": "string" },
+                  "quantity": { "type": "integer" },
+                  "price": { "type": "number" }
+                },
+                "required": ["name", "color", "quantity", "price"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Maxsulot yangilandi" },
+          "404": { "description": "Maxsulot topilmadi" }
+        }
+      },
+      "delete": {
+        "tags": ["Ombor API"],
+        "summary": "Mahsulotni o'chirish",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Maxsulot o'chirildi" },
+          "404": { "description": "Maxsulot topilmadi" }
+        }
+      }
+    },
+    "/api/sales": {
+      "post": {
+        "tags": ["Sotuv API"],
+        "summary": "Yangi sotuv qilish",
+        "description": "User ombordagi mahsulotni productId orqali tanlaydi. Narx ombordagi product narxidan avtomatik olinadi, umumiy summa avtomatik hisoblanadi va ombor qoldig'i kamayadi.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productId": { "type": "integer", "example": 1 },
+                  "quantity": { "type": "integer", "example": 2 },
+                  "paymentMethod": { "type": "string", "enum": ["cash", "card"], "example": "card" }
+                },
+                "required": ["productId", "quantity", "paymentMethod"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Sotuv muvaffaqiyatli yaratildi" },
+          "400": { "description": "Validatsiya yoki ombor qoldig'i xatosi" },
+          "404": { "description": "Mahsulot topilmadi" }
+        }
+      }
+    },
+    "/api/sales/daily": {
+      "get": {
+        "tags": ["Sotuv API"],
+        "summary": "Bir kunlik sotuv tarixi",
+        "description": "date query berilsa o'sha kun, berilmasa bugungi kun sotuvlari qaytadi.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "example": "2026-02-08" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Kunlik sotuvlar va jami summa qaytariladi" },
+          "400": { "description": "Sana formati noto'g'ri" }
+        }
+      }
+    },
+    "/api/sales/history": {
+      "get": {
+        "tags": ["Sotuv API"],
+        "summary": "Barcha kunlar bo'yicha sotuv tarixi",
+        "description": "Query paramsiz ishlaydi. Kunlar kesimida o'sha kundagi summary va sotuvlar ro'yxatini qaytaradi.",
+        "responses": {
+          "200": { "description": "Kunlar bo'yicha guruhlangan sotuv tarixi qaytariladi" }
+        }
+      }
+    },
+    "/api/reports/close-day": {
+      "post": {
+        "tags": ["Hisobot API"],
+        "summary": "Bir kunlik savdoni yopish",
+        "description": "Berilgan sana bo'yicha kunlik savdoni yopadi va hisobotga yozadi.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": { "type": "string", "example": "2026-02-08" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Kunlik savdo yopildi" },
+          "400": { "description": "Sotuv yo'q yoki sana noto'g'ri" },
+          "409": { "description": "Bu sana allaqachon yopilgan" }
+        }
+      }
+    },
+    "/api/reports/daily": {
+      "get": {
+        "tags": ["Hisobot API"],
+        "summary": "Yopilgan kunlar hisobotlari",
+        "description": "Kunlar kesimida: sana, nechta mahsulot sotilgan, naqt va plastik summalari.",
+        "responses": {
+          "200": { "description": "Yopilgan kunlik hisobotlar ro'yxati" }
+        }
+      }
+    }
+  }
+}
