@@ -6,9 +6,11 @@ const salesRouter = require('./routers/sales');
 const reportsRouter = require('./routers/reports');
 const swaggerDocument = require('./swagger.json');
 const { port } = require('./config/app');
+const cors = require('cors')
 
 const app = express();
 app.use(express.json());
+app.use(cors())
 
 app.use('/api/products', productRouter);
 app.use('/api/sales', salesRouter);
