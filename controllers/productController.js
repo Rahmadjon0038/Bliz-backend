@@ -30,6 +30,11 @@ exports.create = (req, res) => {
 };
 
 exports.update = (req, res) => {
+  const numericId = Number(req.params.id);
+  if (!Number.isInteger(numericId) || numericId <= 0) {
+    return res.status(400).json({ message: 'id musbat butun son bo`lishi kerak' });
+  }
+
   const { name, color, quantity, price } = req.body;
 
   if (!name || !color || quantity == null || price == null) {
@@ -39,7 +44,7 @@ exports.update = (req, res) => {
     return res.status(400).json({ message: 'quantity va price musbat son bo`lishi kerak' });
   }
 
-  const result = Product.update(req.params.id, {
+  const result = Product.update(numericId, {
     name,
     color,
     quantity: Number(quantity),
@@ -53,7 +58,18 @@ exports.update = (req, res) => {
 };
 
 exports.delete = (req, res) => {
-  const result = Product.delete(req.params.id);
+  const numericId = Number(req.params.id);
+  if (!Number.isInteger(numericId) || numericId <= 0) {
+    return res.status(400).json({ message: 'id musbat butun son bo`lishi kerak' });
+  }
+
+  if (Product.hasSales(numericId)) {
+    return res.status(409).json({
+      message: 'Bu mahsulot sotuvlarda ishlatilgan, o`chirib bo`lmaydi'
+    });
+  }
+
+  const result = Product.delete(numericId);
   if (result.changes === 0) {
     return res.status(404).json({ message: 'Maxsulot topilmadi' });
   }

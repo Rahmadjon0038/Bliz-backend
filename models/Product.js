@@ -29,6 +29,11 @@ class Product {
     return db.prepare('DELETE FROM products WHERE id = ?').run(id);
   }
 
+  static hasSales(id) {
+    const row = db.prepare('SELECT COUNT(*) AS count FROM sales WHERE product_id = ?').get(id);
+    return row.count > 0;
+  }
+
   static decreaseStock(id, quantity) {
     const stmt = db.prepare(`
       UPDATE products
